@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block forms %}
+	<div class="container" style="margin-top: 30px;">
+        <div class="row">
+            {% if username: %}
+                {% if directory: %}
+                    {% if directory == 'rootdocument': %}
+                        <form action="/{{username}}/" method="POST" class="col form-inline">
+                    {% else:%}
+		                <form action="/{{username}}/{{directory}}" method="POST" class="col form-inline">
+                    {% endif %}
+                {% else: %}
+                <form action="/{{username}}/" method="POST" class="col form-inline">
+                {% endif %}
+                    <div class="form-group mx-sm-3 mb-2">
+                        <input type="text" class="form-control" id="inputFolderName" placeholder="Folder Name" name="folderName">
+                    </div>
+                    <button name="CreateNewFolder" type="submit" class="btn btn-primary mb-2">Create Folder</button>
+                </form>
+            {% endif %}
+            {% if directory: %}
+                {% if directory == 'rootdocument': %}
+                    <form action="/{{username}}/" method="POST" class="col form-inline" enctype="multipart/form-data">
+                {% else:%}
+		            <form action="/{{username}}/{{directory}}" method="POST" class="col form-inline" enctype="multipart/form-data">
+                {% endif %}
+            {% else: %}
+                <form action="/{{username}}/" method="POST" class="col form-inline" enctype="multipart/form-data">
+            {% endif %}
+            <div class="input-group">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="inputGroupFile04" name="fileUpload">
+                    <label class="text-left custom-file-label" for="inputGroupFile04">Choose file</label>
+                </div>
+                <div class="input-group-append">
+                    <button name="UploadNewFile" class="btn btn-primary" type="submit">Upload</button>
+                </div>
+            </div>
+		</form>
+        </div>
+	</div>
+{% endblock %}
+
+{% block files_and_folders %}
+    {% if moveFileStatus: %}
+    <div class="container">
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{movemessage}}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+    <div class="container" style="margin-top: 30px; background-color: #FAFAFA; font-size: 16px; padding: 10px;">
+        {% if folders:%}
+        <span style="padding: 20px;">Folders: {{folders | length}}</span>
+        {% else: %}
+        <span style="padding: 20px;">Folders: 0</span>
+        {% endif %}
+        {% if files:%}
+        <span style="padding: 20px;">Files: {{files | length}}</span><span style="padding: 20px;">Folder Size: {{'%0.2f' % ((files|sum(attribute='size'))/(1024*1024))|float}} MB</span>
+        {% else: %}
+        <span style="padding: 20px;">Files: 0</span>
+        {% endif %}
+        {% if moveFileStatus: %}
+        <span class="float-right" style="margin-top: -3px;">
+            <form action="/{{username}}/{% if directory:%}{%if not directory=='rootdocument':%}{{directory}}{%endif%}{%endif%}" method="post">
+                <button type="submit" class="btn btn-primary btn-sm" name="MoveFileHere">Move File Here</button>
+            </form>
+        </span>
+        {% endif %}
+    </div>
+    <div class="container" style="margin-top: 30px;">
+        
+        <nav aria-label="breadcrumb">
+        <ol class="breadcrumb" style="background-color: #FFFFFF;">
+            <li class=""><a href="/{{username}}"  class="btn btn-light">Home</a></li>
+            {% if bc_folders: %}
+            {% for dir in bc_folders: %}
+                <li class=""><button class="btn"><strong>&#8250;</strong></button><a href="/{{username}}/{{dir[0]}}" class="btn btn-light">{{dir[1]}}</a></li>
+            {% endfor %}
+            {% endif %}
+        </ol>
+        </nav>
+        
+        <ul class="list-unstyled list-group-item" style="border: 0px;">
+            <li style="padding-top: 5px; padding-bottom 5px; border-bottom: 1px solid #EEEEEE;">
+                <div style="width: 100%; padding: 10px; ">
+					<span class="" style="display:inline-block; font-size:16px; font-weight: 700; width: 250px; padding-right: 40px; text-align: left; vertical-align: middle;">Folders</span>
+					<span class="" style="display:inline-block; font-size:16px; font-weight: 700; width: 150px; padding-right: 40px; vertical-align: middle;">File Size</span>
+                    <span class="" style="display:inline-block; font-size:16px; font-weight: 700; width: 150px; padding-right: 40px; vertical-align: middle;">File Type</span>
+                    <span class="" style="display:inline-block; font-size:16px; font-weight: 700; width: 150px; padding-right: 40px; vertical-align: middle;">Created On</span>
+				</div>
+            </li>
+        {% if folders: %}
+        
+            
+        {% for folder in folders: %}
+            
+    
+            <li style="padding-top: 5px; padding-bottom 5px; border-bottom: 1px solid #EEEEEE;">
+                <div style="width: 100%; padding: 10px; ">
+                    <span class="" style="display: inline-block; width: 40px; padding-right: 5px; text-align: left;"><img src="{{ url_for('static', filename='icons/folder.png') }}" style="width: 30px; height: 30px;" /></span>
+					<span class="" style="display: inline-block; width: 210px; padding-right: 40px; text-align: left;"><a href="/{{username}}/{{folder_ids[loop.index-1]}}">{{ folder.name }}</a></span>
+					<span class="" style="display: inline-block; width: 150px;">-</span>
+                    <span class="" style="display: inline-block; width: 150px;">Folder</span>
+                    <span class="" style="display: inline-block; width: 150px;">{{ folder.created_date.strftime('%Y-%m-%d') }}</span>
+					<span class="" style="display: inline-block; width: 100px;"><a href="/{{username}}/{% if directory:%}{%if not directory=='rootdocument':%}{{directory}}{%endif%}{%endif%}?action=deletefolder&folder={{folder_ids[loop.index-1]}}">Delete</a></span>
+				</div>
+            </li>
+            
+        {% endfor %}
+        {% endif %}
+        {% if files:%}
+        {% for file in files: %}
+            
+    
+            <li style="padding-top: 5px; padding-bottom 5px; border-bottom: 1px solid #EEEEEE;">
+                <div style="width: 100%; padding: 10px; ">
+                    {% if file.type == 'Image' %}
+                    <span class="" style="display: inline-block; width: 40px; padding-right: 5px; text-align: left;"><img src="{{ url_for('static', filename='icons/image.png') }}" style="width: 30px; height: 30px;" /></span>
+                    {% elif file.type == 'Text' %}
+                    <span class="" style="display: inline-block; width: 40px; padding-right: 5px; text-align: left;"><img src="{{ url_for('static', filename='icons/text.png') }}" style="width: 30px; height: 30px;" /></span>
+                    {% endif %}
+					<span class="" style="display: inline-block; width: 210px; padding-right: 40px; text-align: left;"><a href="/{{username}}/{% if directory:%}{%if not directory=='rootdocument':%}{{directory}}{%endif%}{%endif%}?action=download&file={{file_ids[loop.index-1]}}" data-toggle="tooltip" title="{{file.display_name}}">{{ file.display_name | truncate(25, true) }}</a></span>
+					<!--<span class="" style="display: inline-block; width: 200px; padding-right: 40px; font-size: 18px; vertical-align: middle; ">{{ file.owner }}</span>-->
+					<span class="" style="display: inline-block; width: 150px;">{{ '%0.2f' % (file.size/(1024*1024))|float }} MB</span>
+                    <span class="" style="display: inline-block; width: 150px;">{{ file.type }}</span>
+                    <span class="" style="display: inline-block; width: 150px;">{{ file.created_date.strftime('%Y-%m-%d') }}</span>
+					<span class="" style="display: inline-block; width: 100px;"><a href="/{{username}}/{% if directory:%}{%if not directory=='rootdocument':%}{{directory}}{%endif%}{%endif%}?action=deletefile&file={{file_ids[loop.index-1]}}">Delete</a></span>
+                    <span class="" style="display: inline-block; width: 100px;"><a href="/{{username}}/{% if directory:%}{%if not directory=='rootdocument':%}{{directory}}{%endif%}{%endif%}?action=movefile&file={{file_ids[loop.index-1]}}&from={{directory}}">Move</a></span>
+				</div>
+            </li>
+            
+        {% endfor %}
+        {% endif %}
+        {% if not files and not folders:%}
+        <li style="padding-top: 5px; padding-bottom 5px; text-align: center;">
+            <div style="width: 100%; padding: 10px; ">
+                The folder is empty.
+            </div>
+        </li>
+        {% endif %}
+        </ul>
+        
+	</div>
+{% endblock %}

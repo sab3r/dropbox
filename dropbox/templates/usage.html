@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block forms %}
+<div class="container">
+    <div class="row" style="margin-top: 100px;">
+        <div class="col" style="border-radius: 5px; padding: 30px;">
+            <p>Folders</p>
+            <h1>{{folders}}</h1>
+        </div>
+        <div class="col" style="border-radius: 5px; padding: 30px;">
+            <p>Files</p>
+            <h1>{{files}}</h1>
+        </div>
+        <div class="col" style="border-radius: 5px; padding: 30px;">
+            <p>Storage Used</p>
+            <h1>{{ '%0.2f' % (total_storage_used/(1024*1024))|float }} MB</h1>
+        </div>
+    </div>
+</div>
+{% endblock %}
