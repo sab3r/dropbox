@@ -9,7 +9,7 @@ cred = credentials.ApplicationDefault()
 firebase_admin.initialize_app(cred, {
     'projectId': config.PROJECT_ID,
 })
-#'projectId': 'dropbox-clone-246121'
+
 def init_app(app):
     pass
 
